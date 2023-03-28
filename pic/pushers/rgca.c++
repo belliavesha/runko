@@ -204,7 +204,7 @@ void pic::rGCAPusher<D,V>::push_container(
 
   //real_long edotb, eperpx, eperpy, eperpz, eperp, bp, ep, psi, eta, zeta;
   real_long ugx, ugy, ugz, ug2, ug2n;
-  real_long G0, G1;
+  real_long G0, G1, G01;
   real_long mu;
 
   // work variables
@@ -305,8 +305,9 @@ void pic::rGCAPusher<D,V>::push_container(
     // NOTE: standard c * vel + qm*epar changed to vel + qm*epar/c
     // NOTE: cinv is multiplied to b0 in the beginning
     // FIXME: or multiply cinv here?
-    upar01 += qm*epar;
     const real_long k0 = sqrt(1.0 + upar01*upar01 + ug2 );     // gamma
+    upar01 += qm*epar; //SWAP?
+  
 
     //--------------------------------------------------
     // step1
@@ -466,16 +467,19 @@ void pic::rGCAPusher<D,V>::push_container(
       vn1x = 0.5*upar01*( bnx0/G0 + bnx1/G1 ) + 0.5*(vex0 + vex1);
       vn1y = 0.5*upar01*( bny0/G0 + bny1/G1 ) + 0.5*(vey0 + vey1);
       vn1z = 0.5*upar01*( bnz0/G0 + bnz1/G1 ) + 0.5*(vez0 + vez1);
-
+      G01 = 1.0/sqrt(1.0 - vn1x*vn1x - vn1y*vn1y - vn1z*vn1z);
       //-------------------------------------------------- 
       // newest GCA four velocity at u_n+1 (for velocity update)
       // gyromotion is taken to be same direction as in the previous step (hence ug_i/sqrt(ug2))
-      // un1x = upar01*bnx1 + vex1*kappa1 + ug2n*ugx/sqrt(ug2);
-      // un1y = upar01*bny1 + vey1*kappa1 + ug2n*ugy/sqrt(ug2);
-      // un1z = upar01*bnz1 + vez1*kappa1 + ug2n*ugz/sqrt(ug2);
-      un1x = upar01*bnx1 + vex1*G1 + ug2n*ugx/sqrt(ug2);
-      un1y = upar01*bny1 + vey1*G1 + ug2n*ugy/sqrt(ug2);
-      un1z = upar01*bnz1 + vez1*G1 + ug2n*ugz/sqrt(ug2);
+      // un1x = upar01*bnx1 + vex1*G1 + sqrt(ug2n)*ugx/sqrt(ug2);
+      // un1y = upar01*bny1 + vey1*G1 + sqrt(ug2n)*ugy/sqrt(ug2);
+      // un1z = upar01*bnz1 + vez1*G1 + sqrt(ug2n)*ugz/sqrt(ug2);
+      // un1x = 0.5*vn1x*(G0+G1) + sqrt(ug2n)*ugx/sqrt(ug2);
+      // un1y = 0.5*vn1y*(G0+G1) + sqrt(ug2n)*ugy/sqrt(ug2);
+      // un1z = 0.5*vn1z*(G0+G1) + sqrt(ug2n)*ugz/sqrt(ug2);
+      un1x = vn1x*(G01) + sqrt(ug2n)*ugx/sqrt(ug2);
+      un1y = vn1y*(G01) + sqrt(ug2n)*ugy/sqrt(ug2);
+      un1z = vn1z*(G01) + sqrt(ug2n)*ugz/sqrt(ug2);
       un12 = un1x*un1x + un1y*un1y + un1z*un1z; 
 
       //-------------------------------------------------- 
@@ -594,7 +598,7 @@ void pic::rGCAPusher<D,V>::push_container(
       std::cout 
         << " loc0n:" << loc[0][n] << " loc1n:" << loc[1][n] << " loc2n:" << loc[2][n]
         << " un1x:" << un1x << " un1y:" << un1y << " un1z:" << un1z
-	<< " un12: " << un12
+      	<< " un12: " << un12
         << " vel0n:" << vel[0][n] << " vel1n:" << vel[1][n] << " vel2n:" << vel[2][n]
         << " G1:" << G1 << " ugx:" << ugx << " ug2:" << ug2
         << " ex0:" << ex0 << " ey0:" << ey0 << " ez0:" << ez0
@@ -615,6 +619,53 @@ void pic::rGCAPusher<D,V>::push_container(
   }
 
 }
+
+/*
+template<size_t D, size_t V>
+void pic::rGCAPusher<D,V>::calc_gradients(
+    pic::Tile<D>& tile
+    )
+{
+
+    const int Nx = tile.mesh_lengths[0];
+    const int Ny = tile.mesh_lengths[1];
+    const int Nz = tile.mesh_lengths[2];
+
+    // fields at grid
+    auto& yee = tile.get_yee();
+
+    auto& exM = yee.ex;
+    auto& eyM = yee.ey;
+    auto& ezM = yee.ez;
+
+    auto& bxM = yee.bx;
+    auto& byM = yee.by;
+    auto& bzM = yee.bz;
+
+
+    const size_t tot = Nx*Ny*Nz //?
+    // mesh sizes for 1D indexing
+    const size_t iy = D >= 2 ? yee.ex.indx(0,1,0) - yee.ex.indx(0,0,0) : 0;
+    const size_t iz = D >= 3 ? yee.ex.indx(0,0,1) - yee.ex.indx(0,0,0) : 0;
+
+    real_long* dbxx = new real_long[];
+    real_long dbxxN[Nx*Ny*Nz];
+    real_long dbxyN[Nx*Ny*Nz];
+    real_long dbxzN[Nx*Ny*Nz];
+    real_long dbyyN[Nx*Ny*Nz];
+    real_long dbyzN[Nx*Ny*Nz];
+    real_long dbzzN[Nx*Ny*Nz];
+    real_long dexxN[Nx*Ny*Nz];
+    real_long dexyN[Nx*Ny*Nz];
+    real_long dexzN[Nx*Ny*Nz];
+    real_long deyyN[Nx*Ny*Nz];
+    real_long deyzN[Nx*Ny*Nz];
+    real_long dezzN[Nx*Ny*Nz];
+
+
+    return;
+}
+*/
 
 
 
