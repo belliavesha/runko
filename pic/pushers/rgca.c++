@@ -305,8 +305,9 @@ void pic::rGCAPusher<D,V>::push_container(
     // NOTE: standard c * vel + qm*epar changed to vel + qm*epar/c
     // NOTE: cinv is multiplied to b0 in the beginning
     // FIXME: or multiply cinv here?
-    upar01 += qm*epar; //SWAP?
+    // upar01 += qm*epar;
     const real_long k0 = sqrt(1.0 + upar01*upar01 + ug2 );     // gamma
+    upar01 += qm*epar; //SWAP?
   
 
     //--------------------------------------------------
