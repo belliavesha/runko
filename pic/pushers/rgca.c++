@@ -460,14 +460,19 @@ void pic::rGCAPusher<D,V>::push_container(
       ug2n = mu*2.0*b1*kappa1/container.m;
 
       const real_long k1 = sqrt(1.0 + upar01*upar01 + ug2n);     // gamma
+      kappa1 =  1.0/(sqrt(1. - 0.5*(vex1*vex1 + vey1*vey1 + vez1*vez1 + vex2*vex2 + vey2*vey2 + vez2*vez2) + EPS); 
 
       G0 = k0*kappa0; // inv Gamma at t = n FIXME: or previous G0?
       G1 = k1*kappa1; // inv Gamma at t = n+1
 
+
       // GCA coordinate-velocity at v_n+1/2 
-      vn1x = 0.5*upar01*( bnx0/G0 + bnx1/G1 ) + 0.5*(vex0 + vex1);
-      vn1y = 0.5*upar01*( bny0/G0 + bny1/G1 ) + 0.5*(vey0 + vey1);
-      vn1z = 0.5*upar01*( bnz0/G0 + bnz1/G1 ) + 0.5*(vez0 + vez1);
+      // vn1x = 0.5*upar01*( bnx0/G0 + bnx1/G1 ) + 0.5*(vex0 + vex1);
+      // vn1y = 0.5*upar01*( bny0/G0 + bny1/G1 ) + 0.5*(vey0 + vey1);
+      // vn1z = 0.5*upar01*( bnz0/G0 + bnz1/G1 ) + 0.5*(vez0 + vez1);
+      vn1x = 0.5*upar01*( bnx0/G1 + bnx1/G1 ) + 0.5*(vex0 + vex1);
+      vn1y = 0.5*upar01*( bny0/G1 + bny1/G1 ) + 0.5*(vey0 + vey1);
+      vn1z = 0.5*upar01*( bnz0/G1 + bnz1/G1 ) + 0.5*(vez0 + vez1);
       G01 = 1.0/sqrt(1.0 - vn1x*vn1x - vn1y*vn1y - vn1z*vn1z);
       //-------------------------------------------------- 
       // newest GCA four velocity at u_n+1 (for velocity update)
@@ -478,9 +483,12 @@ void pic::rGCAPusher<D,V>::push_container(
       // un1x = 0.5*vn1x*(G0+G1) + sqrt(ug2n)*ugx/sqrt(ug2);
       // un1y = 0.5*vn1y*(G0+G1) + sqrt(ug2n)*ugy/sqrt(ug2);
       // un1z = 0.5*vn1z*(G0+G1) + sqrt(ug2n)*ugz/sqrt(ug2);
-      un1x = vn1x*(G01) + sqrt(ug2n)*ugx/sqrt(ug2);
-      un1y = vn1y*(G01) + sqrt(ug2n)*ugy/sqrt(ug2);
-      un1z = vn1z*(G01) + sqrt(ug2n)*ugz/sqrt(ug2);
+      // un1x = vn1x*(G01) + sqrt(ug2n)*ugx/sqrt(ug2);
+      // un1y = vn1y*(G01) + sqrt(ug2n)*ugy/sqrt(ug2);
+      // un1z = vn1z*(G01) + sqrt(ug2n)*ugz/sqrt(ug2);
+      un1x = vn1x*(G1) // + sqrt(ug2n)*ugx/sqrt(ug2);
+      un1y = vn1y*(G1) // + sqrt(ug2n)*ugy/sqrt(ug2);
+      un1z = vn1z*(G1) // + sqrt(ug2n)*ugz/sqrt(ug2);
       un12 = un1x*un1x + un1y*un1y + un1z*un1z; 
 
       //-------------------------------------------------- 
