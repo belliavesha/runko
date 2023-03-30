@@ -460,7 +460,7 @@ void pic::rGCAPusher<D,V>::push_container(
       ug2n = mu*2.0*b1*kappa1/container.m;
 
       const real_long k1 = sqrt(1.0 + upar01*upar01 + ug2n);     // gamma
-      kappa1 =  1.0/(sqrt(1. - 0.5*(vex1*vex1 + vey1*vey1 + vez1*vez1 + vex0*vex0 + vey0*vey0 + vez0*vez0) + EPS); 
+      kappa1 =  1.0/(sqrt(1. - 0.5*(vex1*vex1 + vey1*vey1 + vez1*vez1 + vex0*vex0 + vey0*vey0 + vez0*vez0)) + EPS); 
 
       G0 = k0*kappa0; // inv Gamma at t = n FIXME: or previous G0?
       G1 = k1*kappa1; // inv Gamma at t = n+1
@@ -486,9 +486,9 @@ void pic::rGCAPusher<D,V>::push_container(
       // un1x = vn1x*(G01) + sqrt(ug2n)*ugx/sqrt(ug2);
       // un1y = vn1y*(G01) + sqrt(ug2n)*ugy/sqrt(ug2);
       // un1z = vn1z*(G01) + sqrt(ug2n)*ugz/sqrt(ug2);
-      un1x = vn1x*(G1) // + sqrt(ug2n)*ugx/sqrt(ug2);
-      un1y = vn1y*(G1) // + sqrt(ug2n)*ugy/sqrt(ug2);
-      un1z = vn1z*(G1) // + sqrt(ug2n)*ugz/sqrt(ug2);
+      un1x = vn1x*(G1)  + sqrt(ug2n)*ugx/sqrt(ug2);
+      un1y = vn1y*(G1)  + sqrt(ug2n)*ugy/sqrt(ug2);
+      un1z = vn1z*(G1)  + sqrt(ug2n)*ugz/sqrt(ug2);
       un12 = un1x*un1x + un1y*un1y + un1z*un1z; 
 
       //-------------------------------------------------- 
