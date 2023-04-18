@@ -33,6 +33,10 @@ def parse_input():
             type=str,
             help='Variable to analyze')
 
+    parser.add_argument('--scatter', action=argparse.BooleanOptionalAction, default = False)
+
+    parser.add_argument('--trace', action=argparse.BooleanOptionalAction, default= False)
+
     args = parser.parse_args()
     #args = parser.parse_known_args()
 
