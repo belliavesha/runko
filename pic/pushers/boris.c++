@@ -54,7 +54,7 @@ void pic::BorisPusher<D,V>::push_container(
   real_long vel0n, vel1n, vel2n;
 
   // add division by m_s to simulate multiple species
-
+ 
   //TODO: SIMD
   for(int n=  n1; n<n2; n++) {
     vel0n = static_cast<real_long>( vel[0][n] );
